@@ -38,6 +38,11 @@ def main():
 def handle_dialog(res, req):
     user_id = req["session"]["user_id"]
 
+    res["response"]["buttons"] = [{"title": "Помощь", "hide": True}]
+
+    if help_needed(res, req):
+        return
+
     # если пользователь новый, то просим его представиться.
     if req["session"]["new"]:
         res["response"]["text"] = "Привет! Назови свое имя!"
@@ -64,7 +69,7 @@ def handle_dialog(res, req):
                 + ". Я - Алиса. Какой город хочешь увидеть?"
             )
             # получаем варианты buttons из ключей нашего словаря cities
-            res["response"]["buttons"] = [
+            res["response"]["buttons"] += [
                 {"title": city.title(), "hide": True} for city in cities
             ]
     # если мы знакомы с пользователем и он нам что-то написал,
@@ -108,6 +113,15 @@ def get_first_name(req):
             # то возвращаем ее значение.
             # Во всех остальных случаях возвращаем None.
             return entity["value"].get("first_name", None)
+
+
+def help_needed(req, res):
+    if req["request"]["original_utterance"] == "Помощь":
+        res["response"][
+            "text"
+        ] = "Эта игра про угадывание города! Алиса спрашивает имя пользователя и просит ввести город, картинка которого впоследствии будет выведена пользователю!"
+        res["response"]["end_session"] = True
+        return True
 
 
 if __name__ == "__main__":
